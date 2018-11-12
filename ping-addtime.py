@@ -349,10 +349,10 @@ if __name__ == '__main__':
         # Should fail with 'getaddrinfo print_failed':
 
         # Should fail (timeout), but it depends on the local network:
-        verbose_ping("114.114.114.114")
+        #verbose_ping("114.114.114.114")
 
         # Should fails with 'The requested address is not valid in its context':
-        verbose_ping("0.0.0.0")
+        #verbose_ping("0.0.0.0")
     elif len(sys.argv) == 2:
         verbose_ping(sys.argv[1])
     else:
