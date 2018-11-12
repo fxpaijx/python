@@ -83,10 +83,12 @@ class HeaderInformation(dict):
 
 
 class Ping(object):
-    def __init__(self, destination, timeout=1000, packet_size=55, own_id=None):
+    def __init__(self, destination, log_file,timeout=1000, packet_size=55, own_id=None):
         self.destination = destination
         self.timeout = timeout
         self.packet_size = packet_size
+        self.log_file = log_file
+        print log_file
         if own_id is None:
             self.own_id = os.getpid() & 0xFFFF
         else:
@@ -121,11 +123,11 @@ class Ping(object):
         else:
             from_info = "%s (%s)" % (self.destination, ip)
         nowtime=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
-        global  logfile
+        #global  logfile
         #print("%s %d bytes from %s: icmp_seq=%d ttl=%d time=%.1f ms" % (
         #    nowtime,packet_size, from_info, icmp_header["seq_number"], ip_header["ttl"], delay))
         #logfile.write(("%s %d bytes from %s: icmp_seq=%d ttl=%d time=%.1f ms\n" % (nowtime,packet_size, from_info, icmp_header["seq_number"], ip_header["ttl"], delay)))
-        with open("/var/log/ping_baidu.log","a+") as logfile:
+        with open(log_file,"a+") as logfile:
             logfile.write("%s %d bytes from %s: icmp_seq=%d ttl=%d time=%.1f ms\n" % (nowtime,packet_size, from_info, icmp_header["seq_number"], ip_header["ttl"], delay))
         #print("IP header: %r" % ip_header)
         #print("ICMP header: %r" % icmp_header)
@@ -133,11 +135,11 @@ class Ping(object):
     def print_failed(self):
         nowtime=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())
         #print("%s Request timed out."%(nowtime))
-        with open("/var/log/ping_baidu.log","a+") as logfile:
+        with open(log_file,"a+") as logfile:
             logfile.write("%s Request timed out.\n"%(nowtime))
 
     def print_exit(self):
-        global logfile
+        #global logfile
         print("\n----%s PYTHON PING Statistics----" % (self.destination))
 
         lost_count = self.send_count - self.receive_count
@@ -147,11 +149,11 @@ class Ping(object):
         #print("%d packets transmitted, %d packets received, %0.1f%% packet loss" % (
         #    self.send_count, self.receive_count, lost_rate
         #))
-        with open("/var/log/ping_baidu.log","a+") as logfile:
+        with open(log_file,"a+") as logfile:
              logfile.write("%d packets transmitted, %d packets received, %0.1f%% packet loss\n" % (self.send_count, self.receive_count, lost_rate))
 
         if self.receive_count > 0:
-            with open("/var/log/ping_baidu.log","a+") as logfile:
+            with open(log_file,"a+") as logfile:
                 logfile.write("round-trip (ms)  min/avg/max = %0.3f/%0.3f/%0.3f\n"%(self.min_time, self.total_time / self.receive_count, self.max_time))
             #print("round-trip (ms)  min/avg/max = %0.3f/%0.3f/%0.3f" % (
             #    self.min_time, self.total_time / self.receive_count, self.max_time
@@ -324,12 +326,15 @@ class Ping(object):
                 return None, 0, 0, 0, 0
 
 
-def verbose_ping(hostname, timeout=1000, count=0, packet_size=55):
-    p = Ping(hostname, timeout, packet_size)
+def verbose_ping(hostname,log_file="/data/log/ping.log", timeout=1000, count=0, packet_size=55):
+    p = Ping(hostname,log_file, timeout, packet_size)
     p.run(count)
 
 
 if __name__ == '__main__':
+    
+    #定义日志路径
+    log_file="/data/log/ping_127.log"
     # FIXME: Add a real CLI
     if len(sys.argv) == 1:
         #print "DEMO"
@@ -338,7 +343,8 @@ if __name__ == '__main__':
 
         # Inconsistent on Windows w/ ActivePython (Python 3.2 resolves correctly
         # to the local host, but 2.7 tries to resolve to the local *gateway*)
-        verbose_ping("localhost")
+        #定义要ping的IP
+        verbose_ping("127.0.0.1",log_file)
 
         # Should fail with 'getaddrinfo print_failed':
 
